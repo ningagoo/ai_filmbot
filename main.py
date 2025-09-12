@@ -29,6 +29,8 @@ async def start_http_server():
 
 async def aggressive_ping():
     """Агрессивный самопинг каждые 2 минуты"""
+    await asyncio.sleep(10)
+
     while True:
         try:
             async with ClientSession() as session:
