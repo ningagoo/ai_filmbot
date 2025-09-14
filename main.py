@@ -6,6 +6,7 @@ import asyncio
 from aiohttp import web, ClientSession
 import os
 import aiohttp
+import sys  # Добавлен импорт sys
 
 from bot.handlers import start, code_handler
 from bot.config import config
@@ -49,6 +50,7 @@ async def aggressive_ping():
 
 
 async def run_bot():
+    bot = None
     try:
         bot = Bot(
             token=config.BOT_TOKEN,
@@ -65,6 +67,8 @@ async def run_bot():
 
     except Exception as e:
         print(f"Bot error: {e}")
+        if bot:
+            await bot.session.close()
         await asyncio.sleep(30)
         await run_bot()
 
@@ -81,7 +85,7 @@ async def main():
     except Exception as e:
         print(f"Critical error: {e}")
         await asyncio.sleep(60)
-        asyncio.run(main())
+        os.execv(sys.executable, ['python'] + sys.argv)  # Полный перезапуск
 
 
 if __name__ == "__main__":
