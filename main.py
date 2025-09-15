@@ -6,7 +6,8 @@ import asyncio
 from aiohttp import web, ClientSession
 import os
 import aiohttp
-import sys  # Добавлен импорт sys
+import sys
+import signal
 
 from bot.handlers import start, code_handler
 from bot.config import config
@@ -39,12 +40,8 @@ async def aggressive_ping():
                 async with session.get(url, timeout=15) as response:
                     if response.status == 200:
                         print("Self-ping executed successfully")
-        except asyncio.TimeoutError:
-            print("Ping timeout")
-        except aiohttp.ClientConnectorError:
-            print("Connection error")
-        except Exception as e:
-            print(f"Ping error: {e}")
+        except Exception:
+            pass
 
         await asyncio.sleep(120)
 
@@ -73,7 +70,14 @@ async def run_bot():
         await run_bot()
 
 
+def handle_sigterm(signum, frame):
+    print("Received SIGTERM, restarting immediately...")
+    os.execv(sys.executable, ['python'] + sys.argv)
+
+
 async def main():
+    signal.signal(signal.SIGTERM, handle_sigterm)
+
     print("Starting application...")
 
     try:
@@ -85,7 +89,7 @@ async def main():
     except Exception as e:
         print(f"Critical error: {e}")
         await asyncio.sleep(60)
-        os.execv(sys.executable, ['python'] + sys.argv)  # Полный перезапуск
+        os.execv(sys.executable, ['python'] + sys.argv)
 
 
 if __name__ == "__main__":
